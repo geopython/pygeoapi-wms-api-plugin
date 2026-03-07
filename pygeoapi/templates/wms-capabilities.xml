@@ -1,0 +1,80 @@
+<?xml version='1.0' encoding="UTF-8"?>
+<WMS_Capabilities version="1.3.0" xmlns="http://www.opengis.net/wms" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wms http://schemas.opengis.net/wms/1.3.0/capabilities_1_3_0.xsd">
+  <Service>
+    <Name>WMS</Name>
+    <Title>{{ data['config']['metadata']['identification']['title']['en'] }}</Title>
+    <Abstract>{{ data['config']['metadata']['identification']['description']['en'] }}</Abstract>
+    <KeywordList>
+      {% for kw in data['config']['metadata']['identification']['keywords']['en'] %}
+      <Keyword>{{ kw }}</Keyword>
+      {% endfor %}
+    </KeywordList>
+    <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="{{ data['config']['metadata']['identification']['url'] }}"/>
+    <ContactInformation>
+      <ContactPersonPrimary>
+        <ContactPerson>{{ data['config']['metadata']['contact']['name'] }}</ContactPerson>
+        <ContactOrganization>{{ data['config']['metadata']['contact']['organization'] }}</ContactOrganization>
+      </ContactPersonPrimary>
+      <ContactPosition>{{ data['config']['metadata']['contact']['position'] }}</ContactPosition>
+      <ContactAddress>
+        <AddressType>postal</AddressType>
+        <Address>{{ data['config']['metadata']['contact']['address'] }}</Address>
+        <City>{{ data['config']['metadata']['contact']['city'] }}</City>
+        <StateOrProvince>{{ data['config']['metadata']['contact']['stateorprovince'] }}</StateOrProvince>
+        <PostCode>{{ data['config']['metadata']['contact']['postalcode'] }}</PostCode>
+        <Country>{{ data['config']['metadata']['contact']['country'] }}</Country>
+      </ContactAddress>
+      <ContactVoiceTelephone>{{ data['config']['metadata']['contact']['phone'] }}</ContactVoiceTelephone>
+      <ContactElectronicMailAddress>{{ data['config']['metadata']['contact']['email'] }}</ContactElectronicMailAddress>
+    </ContactInformation>
+    <Fees>none</Fees>
+    <AccessConstraints>none</AccessConstraints>
+  </Service>
+  <Capability>
+    <Request>
+      <GetCapabilities>
+        <Format>text/xml</Format>
+        <DCPType>
+          <HTTP>
+            <Get>
+              <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="{{ data['config']['server']['url'] }}/wms"/>
+            </Get>
+          </HTTP>
+        </DCPType>
+      </GetCapabilities>
+      <GetMap>
+        <Format>image/png</Format>
+        <DCPType>
+          <HTTP>
+            <Get>
+              <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="{{ data['config']['server']['url'] }}/wms/map"/>
+            </Get>
+          </HTTP>
+        </DCPType>
+      </GetMap>
+    </Request>
+    <Exception>
+      <Format>XML</Format>
+    </Exception>
+    <Layer>
+    <Title>{{ data['config']['metadata']['identification']['title']['en'] }}</Title>
+    <CRS>CRS:84</CRS>
+    {% for layer in data['layers'] %}
+      <Layer queryable="0">
+        <Title>{{ layer['title'] }}</Title>
+        <Abstract>{{ layer['abstract'] }}</Abstract>
+        <CRS>{{ layer['spatial']['crs'] }}</CRS>
+        <EX_GeographicBoundingBox>
+          <westBoundLongitude>{{ layer['spatial']['bbox'][0] }}</westBoundLongitude>
+          <eastBoundLongitude>{{ layer['spatial']['bbox'][2] }}</eastBoundLongitude>
+          <southBoundLatitude>{{ layer['spatial']['bbox'][1] }}</southBoundLatitude>
+          <northBoundLatitude>{{ layer['spatial']['bbox'][3] }}</northBoundLatitude>
+        </EX_GeographicBoundingBox>
+      </Layer>
+      {% if layer['temporal'] %}
+      <Dimension name="time" units="ISO8601"{% if layer['temporal']['default']%} default="{{ layer['temporal']['default'] }}"{% endif %}>{{ layer['temporal']['begin'] }}/{{ layer['temporal']['end'] }}{% if layer['temporal']['resolution']%}/{{ layer['temporal']['resolution'] }}{% endif%}</Dimension>
+      {% endif %}
+    {% endfor %}
+    </Layer>
+  </Capability>
+</WMS_Capabilities>
